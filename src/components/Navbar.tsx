@@ -1,34 +1,270 @@
-import { Search, Bell, User } from "lucide-react";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import {
+  Search,
+  Bell,
+  User,
+  Menu,
+  X,
+  Brain,
+  BookOpen,
+  Layers,
+  Settings,
+  LogOut,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import LightningIcon from "@/components/icons/LightningIcon";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
-const Navbar = () => {
+interface NavbarProps {
+  currentStreak?: number;
+  onStreakClick?: () => void;
+  onSearchClick?: () => void;
+  focusModeEnabled?: boolean;
+  onFocusModeToggle?: () => void;
+}
+
+const Navbar = ({
+  currentStreak = 5,
+  onStreakClick,
+  onSearchClick,
+  focusModeEnabled = false,
+  onFocusModeToggle,
+}: NavbarProps) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const navLinks = [
+    { to: "/", label: "Feed" },
+    { to: "/explore", label: "Explore" },
+    { to: "/stacks", label: "Stacks" },
+  ];
+
+  const isActive = (path: string) => {
+    if (path === "/") return location.pathname === "/";
+    return location.pathname.startsWith(path);
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-sm">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        {/* Logo */}
+        {/* Left side */}
         <div className="flex items-center gap-6">
-          <h1 className="font-serif text-xl font-bold tracking-tight text-foreground">
+          <Link
+            to="/"
+            className="font-serif text-xl font-bold tracking-tight text-foreground"
+          >
             Lumina
-          </h1>
-          <nav className="hidden items-center gap-6 font-sans text-sm font-medium text-muted-foreground md:flex">
-            <a href="#" className="text-foreground transition-colors">Feed</a>
-            <a href="#" className="hover:text-foreground transition-colors">Explore</a>
-            <a href="#" className="hover:text-foreground transition-colors">Stacks</a>
+          </Link>
+          <nav className="hidden items-center gap-1 md:flex">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={cn(
+                  "px-3 py-1.5 font-sans text-sm font-medium transition-colors rounded-sm",
+                  isActive(link.to)
+                    ? "text-foreground bg-secondary"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-4">
-          <button className="text-muted-foreground hover:text-foreground transition-colors">
-            <Search className="h-5 w-5" />
+        {/* Right side */}
+        <div className="flex items-center gap-2">
+          {/* Search */}
+          <button
+            onClick={onSearchClick}
+            className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Search"
+          >
+            <Search className="h-[18px] w-[18px]" />
           </button>
-          <button className="text-muted-foreground hover:text-foreground transition-colors">
-            <Bell className="h-5 w-5" />
+
+          {/* Streak */}
+          <button
+            onClick={onStreakClick}
+            className="flex items-center gap-1.5 px-2 py-1.5 text-accent hover:bg-accent/10 transition-colors rounded-sm"
+            aria-label="View streak"
+          >
+            <LightningIcon
+              size={18}
+              filled={currentStreak > 0}
+              className="text-accent"
+            />
+            <span className="font-mono text-sm font-bold text-accent">
+              {currentStreak}
+            </span>
           </button>
-          <button className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <User className="h-4 w-4" />
+
+          {/* Notifications */}
+          <button
+            className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Notifications"
+          >
+            <Bell className="h-[18px] w-[18px]" />
+          </button>
+
+          {/* Profile dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                <User className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-56 bg-background border border-border rounded-sm p-1"
+            >
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <User className="h-4 w-4" />
+                  My Profile
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/brained"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Brain className="h-4 w-4" />
+                  Brained Sparks
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/notes"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  My Notes
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/stacks"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Layers className="h-4 w-4" />
+                  My Stacks
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.preventDefault();
+                  onFocusModeToggle?.();
+                }}
+                className="flex items-center justify-between cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  Focus Mode
+                </span>
+                <div
+                  className={cn(
+                    "relative inline-flex h-5 w-9 items-center rounded-full transition-colors",
+                    focusModeEnabled ? "bg-accent" : "bg-muted"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform",
+                      focusModeEnabled
+                        ? "translate-x-[18px]"
+                        : "translate-x-[3px]"
+                    )}
+                  />
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/settings"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="flex items-center gap-2 text-muted-foreground cursor-pointer">
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Mobile menu toggle */}
+          <button
+            className="flex h-9 w-9 items-center justify-center text-muted-foreground md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </button>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden border-t border-border md:hidden"
+          >
+            <nav className="flex flex-col px-4 py-2">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "py-3 font-sans text-sm font-medium border-b border-border/50 transition-colors",
+                    isActive(link.to)
+                      ? "text-foreground"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
