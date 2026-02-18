@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+import HowItWorks from "@/components/HowItWorks";
 import SparkFeed from "@/components/SparkFeed";
 import StreakDashboard from "@/components/StreakDashboard";
 import FocusMode from "@/components/FocusMode";
@@ -46,6 +47,7 @@ const Index = () => {
 
       <main>
         <HeroSection />
+        <HowItWorks />
         <SparkFeed />
       </main>
     </div>
