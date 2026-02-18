@@ -50,9 +50,9 @@ const HeroSection = () => {
             Start Exploring
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </button>
-          <button className="px-6 py-3 font-sans text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors">
+          <a href="#how-it-works" className="px-6 py-3 font-sans text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors">
             How it works
-          </button>
+          </a>
         </motion.div>
 
         {/* Stats strip */}
