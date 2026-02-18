@@ -56,7 +56,7 @@ const Profile = () => {
         <div className="flex items-end justify-between mb-4">
           {/* Avatar */}
           <div className="w-24 h-24 rounded-sm bg-primary text-primary-foreground flex items-center justify-center font-serif text-3xl font-bold shrink-0 border-4 border-background overflow-hidden">
-            {profile.avatarUrl ? (
+            {profile.avatarUrl && !profile.avatarUrl.includes("dicebear") ? (
               <img src={profile.avatarUrl} alt={profile.displayName} className="w-full h-full object-cover" />
             ) : (
               profile.displayName.charAt(0)
