@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   return (
@@ -46,10 +47,10 @@ const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <button className="group flex items-center gap-2 bg-primary px-6 py-3 font-sans text-sm font-semibold text-primary-foreground transition-all hover:gap-3">
+          <Link to="/explore" className="group flex items-center gap-2 bg-primary px-6 py-3 font-sans text-sm font-semibold text-primary-foreground transition-all hover:gap-3">
             Start Exploring
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </button>
+          </Link>
           <a href="#how-it-works" className="px-6 py-3 font-sans text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors">
             How it works
           </a>
