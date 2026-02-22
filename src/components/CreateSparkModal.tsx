@@ -34,6 +34,7 @@ const CATEGORIES = [
   "Technology",
   "Psychology",
   "Economics",
+  "Art",
 ];
 
 const CreateSparkModal = ({ isOpen, onClose }: CreateSparkModalProps) => {

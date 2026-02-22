@@ -124,4 +124,12 @@ export const mockTopics: Topic[] = [
     description:
       "The science of substances, their properties, reactions, and transformations, bridging physics at the atomic level and biology at the molecular level.",
   },
+  {
+    id: "topic-art",
+    name: "Art",
+    sparkCount: 12,
+    connections: ["topic-culture", "topic-history", "topic-philosophy"],
+    description:
+      "The expression of human creativity and imagination through visual, auditory, and performative mediums, spanning painting, sculpture, music, film, and digital art.",
+  },
 ];
