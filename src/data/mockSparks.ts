@@ -644,6 +644,45 @@ export const mockSparks: Spark[] = [
     publishedAt: "2025-11-25T10:00:00Z",
     status: "published",
   },
+  // 13 — Art
+  {
+    id: "spark-13",
+    title: "Why Rothko's Color Fields Make People Cry",
+    slug: "rothko-color-fields-make-people-cry",
+    author: author(1),
+    category: "Art",
+    readTime: "5 min",
+    readTimeMinutes: 5,
+    image: spark3,
+    excerpt:
+      "Mark Rothko's luminous rectangles bypass language and narrative, triggering deep emotional responses that viewers struggle to explain.",
+    content: [
+      {
+        type: "paragraph",
+        text: "Stand close to a Rothko painting in a quiet gallery and something unexpected happens. The enormous, softly vibrating fields of color seem to envelop you. Visitors report tears, awe, even a sense of transcendence — reactions that feel disproportionate to what is, on the surface, just colored paint on canvas.",
+      },
+      {
+        type: "heading",
+        text: "Emotion Without Representation",
+      },
+      {
+        type: "paragraph",
+        text: "Rothko deliberately stripped away recognizable imagery to create what he called 'basic human emotions — tragedy, ecstasy, doom.' By eliminating narrative, he forced viewers into a direct confrontation with color, scale, and light. Neuroscientific research suggests that large-scale color fields activate the brain's emotional circuits without the mediation of the visual processing pathways used for object recognition.",
+      },
+      {
+        type: "quote",
+        text: "I'm not an abstractionist. I'm not interested in the relationship of color or form. I'm interested only in expressing basic human emotions.",
+        source: "Mark Rothko",
+      },
+      {
+        type: "paragraph",
+        text: "Rothko insisted his paintings be hung in intimate, dimly lit spaces and viewed from up close. He understood intuitively what perception scientists would later confirm: at the right scale and distance, a visual field can overwhelm peripheral vision and create an immersive experience that the brain processes more like an environment than an object.",
+      },
+    ],
+    brainCount: 3412,
+    publishedAt: "2025-12-22T11:00:00Z",
+    status: "published",
+  },
 ];
 
 // ---------------------------------------------------------------------------
