@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Plus } from "lucide-react";
+import { motion } from "framer-motion";
 import SparkCard from "./SparkCard";
+import CreateSparkModal from "./CreateSparkModal";
 import { mockSparks } from "@/data/mockSparks";
 
 const INITIAL_COUNT = 6;
@@ -7,6 +10,7 @@ const LOAD_MORE_COUNT = 3;
 
 const SparkFeed = () => {
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
+  const [createOpen, setCreateOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const todaySparks = mockSparks.slice(0, 3);
@@ -89,16 +93,18 @@ const SparkFeed = () => {
         ))}
       </div>
 
-      {/* Infinite scroll sentinel */}
-      {visibleCount < allSparks.length && (
-        <div ref={loadMoreRef} className="flex justify-center py-8">
-          <div className="flex items-center gap-2 font-sans text-sm text-muted-foreground">
-            <div className="h-1 w-1 rounded-full bg-accent animate-pulse" />
-            <div className="h-1 w-1 rounded-full bg-accent animate-pulse [animation-delay:0.2s]" />
-            <div className="h-1 w-1 rounded-full bg-accent animate-pulse [animation-delay:0.4s]" />
-          </div>
-        </div>
-      )}
+      {/* Floating create button */}
+      <motion.button
+        onClick={() => setCreateOpen(true)}
+        className="fixed bottom-8 right-8 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg transition-colors hover:bg-accent/90"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        aria-label="Create a Spark"
+      >
+        <Plus className="h-6 w-6" />
+      </motion.button>
+
+      <CreateSparkModal isOpen={createOpen} onClose={() => setCreateOpen(false)} />
     </section>
   );
 };
