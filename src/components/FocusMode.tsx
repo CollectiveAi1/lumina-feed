@@ -5,8 +5,9 @@ import LightningIcon from "@/components/icons/LightningIcon";
 import { cn } from "@/lib/utils";
 
 interface FocusModeProps {
-  isActive: boolean;
-  onStart: (minutes: number) => void;
+  isActive?: boolean;
+  isEnabled?: boolean;
+  onStart: (minutes?: number) => void;
   onEnd: () => void;
   onExtend: () => void;
   sparksRead?: number;
@@ -18,6 +19,7 @@ const PRESETS = [5, 10, 15, 20, 30];
 
 const FocusMode = ({
   isActive,
+  isEnabled,
   onStart,
   onEnd,
   onExtend,
@@ -25,6 +27,8 @@ const FocusMode = ({
   categoriesTouched = [],
   currentStreak = 0,
 }: FocusModeProps) => {
+  // Support both isActive and isEnabled prop names
+  const active = isActive ?? isEnabled ?? false;
   const [showSetup, setShowSetup] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [selectedMinutes, setSelectedMinutes] = useState(15);
@@ -41,7 +45,7 @@ const FocusMode = ({
   };
 
   useEffect(() => {
-    if (!isActive || timeRemaining <= 0) return;
+    if (!active || timeRemaining <= 0) return;
     const interval = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
@@ -123,7 +127,7 @@ const FocusMode = ({
       </AnimatePresence>
 
       {/* Active session progress bar */}
-      {isActive && timeRemaining > 0 && (
+      {active && timeRemaining > 0 && (
         <div className="fixed top-14 left-0 right-0 z-30 h-1.5 bg-muted">
           <motion.div
             className="h-full bg-accent"

@@ -22,6 +22,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import NotificationsDropdown from "@/components/NotificationsDropdown";
+import { useApp } from "@/context/AppContext";
+import { useNavigate } from "react-router-dom";
 
 interface NavbarProps {
   currentStreak?: number;
@@ -29,6 +32,7 @@ interface NavbarProps {
   onSearchClick?: () => void;
   focusModeEnabled?: boolean;
   onFocusModeToggle?: () => void;
+  unreadCount?: number;
 }
 
 const Navbar = ({
@@ -37,9 +41,18 @@ const Navbar = ({
   onSearchClick,
   focusModeEnabled = false,
   onFocusModeToggle,
+  unreadCount = 0,
 }: NavbarProps) => {
+  const { signOut, currentUser } = useApp();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const location = useLocation();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
 
   const navLinks = [
     { to: "/", label: "Feed" },
@@ -109,18 +122,32 @@ const Navbar = ({
           </button>
 
           {/* Notifications */}
-          <button
-            className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Notifications"
-          >
-            <Bell className="h-[18px] w-[18px]" />
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setNotifOpen((v) => !v)}
+              className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground transition-colors relative"
+              aria-label="Notifications"
+            >
+              <Bell className="h-[18px] w-[18px]" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent" />
+              )}
+            </button>
+            <NotificationsDropdown
+              isOpen={notifOpen}
+              onClose={() => setNotifOpen(false)}
+            />
+          </div>
 
           {/* Profile dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                <User className="h-4 w-4" />
+              <button className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors overflow-hidden">
+                {currentUser.avatar ? (
+                  <img src={currentUser.avatar} alt={currentUser.displayName} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="h-4 w-4" />
+                )}
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -213,7 +240,10 @@ const Navbar = ({
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center gap-2 text-muted-foreground cursor-pointer">
+              <DropdownMenuItem
+                onClick={handleSignOut}
+                className="flex items-center gap-2 text-muted-foreground cursor-pointer"
+              >
                 <LogOut className="h-4 w-4" />
                 Sign Out
               </DropdownMenuItem>

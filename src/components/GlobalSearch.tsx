@@ -1,16 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
 import { Search, X, Sparkles, Layers, Users, BookOpen, Filter } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { mockSparks, mockStacks, mockAuthors, mockNotes } from "@/data/mockSparks";
+import { mockAuthors } from "@/data/mockSparks";
 import { mockTopics } from "@/data/mockTopics";
+import { useApp } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 
 type SearchFilter = "all" | "sparks" | "topics" | "authors" | "stacks" | "notes";
-
-const CATEGORY_OPTIONS = [
-  ...new Set(mockSparks.map((s) => s.category)),
-];
 
 interface GlobalSearchProps {
   isOpen: boolean;
@@ -18,10 +15,16 @@ interface GlobalSearchProps {
 }
 
 const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
+  const { sparks, stacks, notes } = useApp();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<SearchFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const CATEGORY_OPTIONS = useMemo(
+    () => [...new Set(sparks.map((s) => s.category))],
+    [sparks]
+  );
 
   // Reset on open
   useEffect(() => {
@@ -41,35 +44,21 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
     return () => window.removeEventListener("keydown", handleKey);
   }, [isOpen, onClose]);
 
-  // Keyboard shortcut: Cmd/Ctrl + K
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        if (!isOpen) {
-          // parent handles opening
-        } else {
-          onClose();
-        }
-      }
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [isOpen, onClose]);
-
   const q = query.toLowerCase().trim();
 
   const results = useMemo(() => {
     if (!q) return { sparks: [], topics: [], authors: [], stacks: [], notes: [] };
 
-    const sparks =
+    const filteredSparks =
       filter === "all" || filter === "sparks"
-        ? mockSparks.filter((s) => {
+        ? sparks.filter((s) => {
+            const authorName =
+              typeof s.author === "string" ? s.author : s.author.name;
             const matchesQuery =
               s.title.toLowerCase().includes(q) ||
               s.excerpt.toLowerCase().includes(q) ||
               s.category.toLowerCase().includes(q) ||
-              s.author.displayName.toLowerCase().includes(q);
+              authorName.toLowerCase().includes(q);
             const matchesCategory = !categoryFilter || s.category === categoryFilter;
             return matchesQuery && matchesCategory;
           })
@@ -90,26 +79,32 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
             (a) =>
               a.displayName.toLowerCase().includes(q) ||
               a.username.toLowerCase().includes(q) ||
-              a.bio.toLowerCase().includes(q)
+              (a.bio && a.bio.toLowerCase().includes(q))
           )
         : [];
 
-    const stacks =
+    const filteredStacks =
       filter === "all" || filter === "stacks"
-        ? mockStacks.filter(
+        ? stacks.filter(
             (s) =>
               s.title.toLowerCase().includes(q) ||
-              s.description.toLowerCase().includes(q)
+              (s.description && s.description.toLowerCase().includes(q))
           )
         : [];
 
-    const notes =
+    const filteredNotes =
       filter === "all" || filter === "notes"
-        ? mockNotes.filter((n) => n.content.toLowerCase().includes(q))
+        ? notes.filter((n) => n.content.toLowerCase().includes(q))
         : [];
 
-    return { sparks, topics, authors, stacks, notes };
-  }, [q, filter, categoryFilter]);
+    return {
+      sparks: filteredSparks,
+      topics,
+      authors,
+      stacks: filteredStacks,
+      notes: filteredNotes,
+    };
+  }, [q, filter, categoryFilter, sparks, stacks, notes]);
 
   const totalResults =
     results.sparks.length +
@@ -127,23 +122,19 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
     { value: "notes", label: "Notes", icon: <BookOpen className="h-3.5 w-3.5" /> },
   ];
 
-  const handleSparkClick = (slug: string) => {
+  const handleSparkClick = (id: string) => {
     onClose();
-    // In a real app, navigate to spark detail
+    navigate(`/spark/${id}`);
   };
 
-  const handleTopicClick = (name: string) => {
+  const handleTopicClick = () => {
     onClose();
     navigate("/explore");
   };
 
-  const handleAuthorClick = () => {
+  const handleStackClick = (id: string) => {
     onClose();
-  };
-
-  const handleStackClick = () => {
-    onClose();
-    navigate("/stacks");
+    navigate(`/stack/${id}`);
   };
 
   const handleNoteClick = () => {
@@ -187,7 +178,10 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
                 <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] text-muted-foreground">
                   ESC
                 </kbd>
-                <button onClick={onClose} className="text-muted-foreground hover:text-foreground sm:hidden">
+                <button
+                  onClick={onClose}
+                  className="text-muted-foreground hover:text-foreground sm:hidden"
+                >
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -217,7 +211,9 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
                     {CATEGORY_OPTIONS.map((cat) => (
                       <button
                         key={cat}
-                        onClick={() => setCategoryFilter(categoryFilter === cat ? null : cat)}
+                        onClick={() =>
+                          setCategoryFilter(categoryFilter === cat ? null : cat)
+                        }
                         className={cn(
                           "px-2 py-1 rounded-sm font-sans text-[10px] font-medium transition-colors whitespace-nowrap",
                           categoryFilter === cat
@@ -259,27 +255,33 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
                     <p className="px-2 py-1.5 font-sans text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                       Sparks
                     </p>
-                    {results.sparks.map((spark) => (
-                      <button
-                        key={spark.id}
-                        onClick={() => handleSparkClick(spark.slug)}
-                        className="flex items-center gap-3 w-full px-2 py-2 rounded-sm hover:bg-secondary transition-colors text-left"
-                      >
-                        <img
-                          src={spark.image}
-                          alt={spark.title}
-                          className="w-10 h-10 rounded-sm object-cover shrink-0"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="font-serif text-sm font-semibold text-foreground truncate">
-                            {spark.title}
-                          </p>
-                          <p className="font-sans text-[11px] text-muted-foreground truncate">
-                            {spark.author.displayName} · {spark.category}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
+                    {results.sparks.map((spark) => {
+                      const authorName =
+                        typeof spark.author === "string"
+                          ? spark.author
+                          : spark.author.name;
+                      return (
+                        <button
+                          key={spark.id}
+                          onClick={() => handleSparkClick(spark.id)}
+                          className="flex items-center gap-3 w-full px-2 py-2 rounded-sm hover:bg-secondary transition-colors text-left"
+                        >
+                          <img
+                            src={spark.image}
+                            alt={spark.title}
+                            className="w-10 h-10 rounded-sm object-cover shrink-0"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="font-serif text-sm font-semibold text-foreground truncate">
+                              {spark.title}
+                            </p>
+                            <p className="font-sans text-[11px] text-muted-foreground truncate">
+                              {authorName} · {spark.category}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -292,7 +294,7 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
                     {results.topics.map((topic) => (
                       <button
                         key={topic.id}
-                        onClick={() => handleTopicClick(topic.name)}
+                        onClick={handleTopicClick}
                         className="flex items-center gap-3 w-full px-2 py-2 rounded-sm hover:bg-secondary transition-colors text-left"
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-accent/10 shrink-0">
@@ -303,7 +305,8 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
                             {topic.name}
                           </p>
                           <p className="font-sans text-[11px] text-muted-foreground truncate">
-                            {topic.sparkCount} sparks · {topic.description.slice(0, 60)}…
+                            {topic.sparkCount} sparks ·{" "}
+                            {topic.description.slice(0, 60)}…
                           </p>
                         </div>
                       </button>
@@ -320,7 +323,7 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
                     {results.authors.map((author) => (
                       <button
                         key={author.id}
-                        onClick={handleAuthorClick}
+                        onClick={() => onClose()}
                         className="flex items-center gap-3 w-full px-2 py-2 rounded-sm hover:bg-secondary transition-colors text-left"
                       >
                         <img
@@ -350,20 +353,28 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
                     {results.stacks.map((stack) => (
                       <button
                         key={stack.id}
-                        onClick={handleStackClick}
+                        onClick={() => handleStackClick(stack.id)}
                         className="flex items-center gap-3 w-full px-2 py-2 rounded-sm hover:bg-secondary transition-colors text-left"
                       >
-                        <img
-                          src={stack.coverImage}
-                          alt={stack.title}
-                          className="w-10 h-10 rounded-sm object-cover shrink-0"
-                        />
+                        {stack.coverImage ? (
+                          <img
+                            src={stack.coverImage}
+                            alt={stack.title}
+                            className="w-10 h-10 rounded-sm object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-accent/10 shrink-0">
+                            <Layers className="h-4 w-4 text-accent" />
+                          </div>
+                        )}
                         <div className="min-w-0 flex-1">
                           <p className="font-serif text-sm font-semibold text-foreground">
                             {stack.title}
                           </p>
                           <p className="font-sans text-[11px] text-muted-foreground truncate">
-                            {stack.sparkCount} sparks · {stack.description.slice(0, 50)}…
+                            {stack.sparkCount} sparks
+                            {stack.description &&
+                              ` · ${stack.description.slice(0, 50)}…`}
                           </p>
                         </div>
                       </button>
@@ -388,7 +399,8 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="font-sans text-sm text-foreground truncate">
-                            {note.content.slice(0, 80)}…
+                            {note.content.slice(0, 80)}
+                            {note.content.length > 80 ? "…" : ""}
                           </p>
                           <p className="font-mono text-[10px] text-muted-foreground">
                             {new Date(note.createdAt).toLocaleDateString()}
@@ -403,7 +415,9 @@ const GlobalSearch = ({ isOpen, onClose }: GlobalSearchProps) => {
               {/* Footer */}
               <div className="flex items-center justify-between border-t border-border px-4 py-2">
                 <p className="font-mono text-[10px] text-muted-foreground">
-                  {q ? `${totalResults} result${totalResults !== 1 ? "s" : ""}` : ""}
+                  {q
+                    ? `${totalResults} result${totalResults !== 1 ? "s" : ""}`
+                    : ""}
                 </p>
                 <p className="font-mono text-[10px] text-muted-foreground hidden sm:block">
                   ⌘K to toggle

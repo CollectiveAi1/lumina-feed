@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Layers, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { Stack } from "@/data/mockSparks";
 
 interface StackCardProps {
@@ -8,6 +9,7 @@ interface StackCardProps {
 }
 
 const StackCard = ({ stack, index = 0 }: StackCardProps) => {
+  const navigate = useNavigate();
   // Get first 4 spark images for mosaic
   const mosaicImages = stack.sparks.slice(0, 4).map((s) => s.image);
 
@@ -17,6 +19,7 @@ const StackCard = ({ stack, index = 0 }: StackCardProps) => {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.08 }}
+      onClick={() => navigate(`/stack/${stack.id}`)}
     >
       {/* Mosaic thumbnail */}
       <div className="aspect-[16/9] relative grid grid-cols-2 grid-rows-2 gap-px bg-border overflow-hidden">

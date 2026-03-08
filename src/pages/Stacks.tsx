@@ -2,10 +2,15 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import StackCard from "@/components/StackCard";
 import CreateStackModal from "@/components/CreateStackModal";
-import { mockStacks } from "@/data/mockSparks";
+import { useApp } from "@/context/AppContext";
 
 const Stacks = () => {
+  const { stacks } = useApp();
   const [createModalOpen, setCreateModalOpen] = useState(false);
+
+  // First 2 stacks belong to current user (by convention)
+  const myStacks = stacks.slice(0, 2);
+  const discoverStacks = stacks;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -34,12 +39,29 @@ const Stacks = () => {
           <h2 className="font-serif text-xl font-semibold text-foreground">
             Your Stacks
           </h2>
+          <span className="font-mono text-xs text-muted-foreground">
+            {myStacks.length} stack{myStacks.length !== 1 ? "s" : ""}
+          </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mockStacks.slice(0, 2).map((stack, i) => (
-            <StackCard key={stack.id} stack={stack} index={i} />
-          ))}
-        </div>
+        {myStacks.length === 0 ? (
+          <div className="text-center py-10 border border-dashed border-border rounded-sm">
+            <p className="font-sans text-sm text-muted-foreground">
+              You haven't created any Stacks yet.
+            </p>
+            <button
+              onClick={() => setCreateModalOpen(true)}
+              className="mt-3 text-accent text-sm hover:underline"
+            >
+              Create your first Stack
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {myStacks.map((stack, i) => (
+              <StackCard key={stack.id} stack={stack} index={i} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Discover */}
@@ -53,7 +75,7 @@ const Stacks = () => {
           </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mockStacks.map((stack, i) => (
+          {discoverStacks.map((stack, i) => (
             <StackCard key={stack.id} stack={stack} index={i} />
           ))}
         </div>

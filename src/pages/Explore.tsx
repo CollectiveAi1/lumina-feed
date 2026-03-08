@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, ChevronRight } from "lucide-react";
 import { mockTopics, type Topic } from "@/data/mockTopics";
-import { mockSparks } from "@/data/mockSparks";
+import { useApp } from "@/context/AppContext";
 import SparkCard from "@/components/SparkCard";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +24,7 @@ const getNodePositions = (topics: Topic[]) => {
 };
 
 const Explore = () => {
+  const { sparks, brainedSparkIds, toggleBrain } = useApp();
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobile, setIsMobile] = useState(false);
@@ -47,7 +48,7 @@ const Explore = () => {
     (t) => t.id === selectedTopic
   );
   const topicSparks = selectedTopic
-    ? mockSparks.filter((s) => s.category === selectedTopicData?.name)
+    ? sparks.filter((s) => s.category === selectedTopicData?.name)
     : [];
 
   // Get connections as pairs
@@ -159,6 +160,8 @@ const Explore = () => {
                       {...spark}
                       author={spark.author}
                       index={i}
+                      isBrained={brainedSparkIds.has(spark.id)}
+                      onBrain={() => toggleBrain(spark.id)}
                     />
                   ))}
                 </div>
@@ -314,6 +317,8 @@ const Explore = () => {
                       {...spark}
                       author={spark.author}
                       index={i}
+                      isBrained={brainedSparkIds.has(spark.id)}
+                      onBrain={() => toggleBrain(spark.id)}
                     />
                   ))}
                 </div>

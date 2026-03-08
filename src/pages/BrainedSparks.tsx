@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { mockCurrentUser, mockSparks } from "@/data/mockSparks";
+import { useApp } from "@/context/AppContext";
 import SparkCard from "@/components/SparkCard";
 import BrainIcon from "@/components/icons/BrainIcon";
 
 const BrainedSparks = () => {
+  const { sparks, brainedSparkIds, toggleBrain } = useApp();
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-  const brainedSparks = mockSparks.filter((s) =>
-    mockCurrentUser.brainedSparks.includes(s.id)
-  );
+
+  const brainedSparks = sparks.filter((s) => brainedSparkIds.has(s.id));
   const categories = [...new Set(brainedSparks.map((s) => s.category))];
 
   const filtered = categoryFilter
@@ -64,7 +64,8 @@ const BrainedSparks = () => {
             key={spark.id}
             {...spark}
             author={spark.author}
-            isBrained
+            isBrained={brainedSparkIds.has(spark.id)}
+            onBrain={() => toggleBrain(spark.id)}
             index={i}
           />
         ))}
@@ -74,10 +75,14 @@ const BrainedSparks = () => {
         <div className="text-center py-16">
           <BrainIcon size={40} className="mx-auto text-muted-foreground mb-3" />
           <p className="font-serif text-lg font-semibold text-foreground mb-1">
-            No brained Sparks yet
+            {brainedSparks.length === 0
+              ? "No brained Sparks yet"
+              : "No Sparks in this category"}
           </p>
           <p className="font-sans text-sm text-muted-foreground">
-            Tap the brain icon on any Spark to save it here
+            {brainedSparks.length === 0
+              ? "Tap the brain icon on any Spark to save it here"
+              : "Try a different category filter"}
           </p>
         </div>
       )}

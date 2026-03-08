@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useApp } from "@/context/AppContext";
 import {
   Dialog,
   DialogContent,
@@ -13,16 +14,33 @@ interface CreateStackModalProps {
 }
 
 const CreateStackModal = ({ open, onOpenChange }: CreateStackModalProps) => {
+  const { addStack } = useApp();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isCollaborative, setIsCollaborative] = useState(false);
 
-  const handleCreate = () => {
-    console.log("Creating stack:", { title, description, isCollaborative });
-    onOpenChange(false);
-    setTitle("");
-    setDescription("");
-    setIsCollaborative(false);
+  const [creating, setCreating] = useState(false);
+
+  const handleCreate = async () => {
+    if (!title.trim() || creating) return;
+    setCreating(true);
+    try {
+      await addStack({
+        id: "",
+        title: title.trim(),
+        description: description.trim(),
+        isCollaborative,
+        isPublic: !isCollaborative,
+      });
+      onOpenChange(false);
+      setTitle("");
+      setDescription("");
+      setIsCollaborative(false);
+    } catch {
+      // silently fail — could add toast
+    } finally {
+      setCreating(false);
+    }
   };
 
   return (
@@ -84,10 +102,10 @@ const CreateStackModal = ({ open, onOpenChange }: CreateStackModalProps) => {
           </div>
           <button
             onClick={handleCreate}
-            disabled={!title.trim()}
+            disabled={!title.trim() || creating}
             className="w-full h-10 bg-accent text-accent-foreground font-sans text-sm font-semibold hover:bg-accent/90 transition-colors rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create Stack
+            {creating ? "Creating…" : "Create Stack"}
           </button>
         </div>
       </DialogContent>

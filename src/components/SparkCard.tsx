@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BrainIcon from "@/components/icons/BrainIcon";
 
 interface SparkCardProps {
@@ -40,6 +41,7 @@ const SparkCard = ({
   onAuthorClick,
   onClick,
 }: SparkCardProps) => {
+  const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const [isBrained, setIsBrained] = useState(initialBrained);
   const [count, setCount] = useState(brainCount);
@@ -54,6 +56,14 @@ const SparkCard = ({
     onBrain?.(id);
   };
 
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick();
+    } else if (id) {
+      navigate(`/spark/${id}`);
+    }
+  };
+
   return (
     <motion.article
       className="group relative aspect-[4/5] overflow-hidden rounded-sm cursor-pointer"
@@ -62,7 +72,7 @@ const SparkCard = ({
       transition={{ duration: 0.5, delay: index * 0.08, ease: "easeOut" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={onClick}
+      onClick={handleCardClick}
     >
       {/* Image */}
       <motion.img

@@ -1,53 +1,68 @@
-import { useState } from "react";
 import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
-import HowItWorks from "@/components/HowItWorks";
 import SparkFeed from "@/components/SparkFeed";
+import HeroSection from "@/components/HeroSection";
 import StreakDashboard from "@/components/StreakDashboard";
 import FocusMode from "@/components/FocusMode";
-import { mockCurrentUser, mockStreakLog } from "@/data/mockSparks";
+import GlobalSearch from "@/components/GlobalSearch";
+import { useApp } from "@/context/AppContext";
+import { useState } from "react";
 
 const Index = () => {
-  const [streakOpen, setStreakOpen] = useState(false);
-  const [focusModeEnabled, setFocusModeEnabled] = useState(
-    mockCurrentUser.focusModeEnabled
-  );
-  const [focusActive, setFocusActive] = useState(false);
+  const {
+    currentUser,
+    streakLog,
+    streakOpen,
+    setStreakOpen,
+    focusModeEnabled,
+    setFocusModeEnabled,
+    sparks,
+    brainedSparkIds,
+    unreadCount,
+    selectedTopics,
+  } = useApp();
+
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Show hero only when the user has no read sparks yet (fresh session)
+  const hasReadSparks = brainedSparkIds.size > 0 || sparks.some((s) => s.brainCount > 0);
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar
-        currentStreak={mockCurrentUser.currentStreak}
+        currentStreak={currentUser.currentStreak}
         onStreakClick={() => setStreakOpen(!streakOpen)}
+        onSearchClick={() => setSearchOpen(true)}
         focusModeEnabled={focusModeEnabled}
         onFocusModeToggle={() => setFocusModeEnabled(!focusModeEnabled)}
+        unreadCount={unreadCount}
       />
 
       <StreakDashboard
         isOpen={streakOpen}
         onClose={() => setStreakOpen(false)}
-        currentStreak={mockCurrentUser.currentStreak}
-        bestStreak={mockCurrentUser.bestStreak}
-        consecutiveWeeks={mockCurrentUser.consecutiveWeeks}
-        streakDays={mockStreakLog}
-        hasReadToday={
-          mockStreakLog[mockStreakLog.length - 1]?.isActive ?? false
-        }
+        currentStreak={currentUser.currentStreak}
+        bestStreak={currentUser.bestStreak}
+        consecutiveWeeks={currentUser.consecutiveWeeks}
+        streakDays={streakLog}
+        hasReadToday={streakLog[streakLog.length - 1]?.isActive ?? false}
       />
 
-      <FocusMode
-        isActive={focusActive}
-        onStart={() => setFocusActive(true)}
-        onEnd={() => setFocusActive(false)}
-        onExtend={() => setFocusActive(true)}
-        sparksRead={3}
-        categoriesTouched={["Neuroscience", "Mathematics", "History"]}
-        currentStreak={mockCurrentUser.currentStreak}
-      />
+      {focusModeEnabled && (
+        <FocusMode
+          isEnabled={focusModeEnabled}
+          onStart={() => {}}
+          onEnd={() => setFocusModeEnabled(false)}
+          onExtend={() => {}}
+          sparksRead={brainedSparkIds.size}
+          currentStreak={currentUser.currentStreak}
+        />
+      )}
+
+      <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
       <main>
-        <HeroSection />
-        <HowItWorks />
+        {/* Show hero section only for users who haven't engaged yet */}
+        {!hasReadSparks && <HeroSection />}
         <SparkFeed />
       </main>
     </div>

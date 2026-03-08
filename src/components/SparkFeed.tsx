@@ -1,20 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import SparkCard from "./SparkCard";
+import { useApp } from "@/context/AppContext";
+import CreateSparkModal from "./CreateSparkModal";
 import { Plus } from "lucide-react";
 import { motion } from "framer-motion";
-import SparkCard from "./SparkCard";
-import CreateSparkModal from "./CreateSparkModal";
-import { mockSparks } from "@/data/mockSparks";
 
 const INITIAL_COUNT = 6;
 const LOAD_MORE_COUNT = 3;
 
 const SparkFeed = () => {
+  const { sparks, brainedSparkIds, toggleBrain } = useApp();
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const [createOpen, setCreateOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const todaySparks = mockSparks.slice(0, 3);
-  const allSparks = mockSparks;
+  const todaySparks = sparks.slice(0, 3);
+  const allSparks = sparks;
   const visibleSparks = allSparks.slice(0, visibleCount);
 
   // Infinite scroll observer
@@ -64,6 +65,8 @@ const SparkFeed = () => {
               key={spark.id}
               {...spark}
               author={spark.author}
+              isBrained={brainedSparkIds.has(spark.id)}
+              onBrain={() => toggleBrain(spark.id)}
               index={i}
             />
           ))}
@@ -88,23 +91,36 @@ const SparkFeed = () => {
             key={spark.id}
             {...spark}
             author={spark.author}
+            isBrained={brainedSparkIds.has(spark.id)}
+            onBrain={() => toggleBrain(spark.id)}
             index={i}
           />
         ))}
       </div>
 
+      {/* Infinite scroll sentinel */}
+      {visibleCount < allSparks.length && (
+        <div ref={loadMoreRef} className="flex justify-center py-8">
+          <div className="flex items-center gap-2 font-sans text-sm text-muted-foreground">
+            <div className="h-1 w-1 rounded-full bg-accent animate-pulse" />
+            <div className="h-1 w-1 rounded-full bg-accent animate-pulse [animation-delay:0.2s]" />
+            <div className="h-1 w-1 rounded-full bg-accent animate-pulse [animation-delay:0.4s]" />
+          </div>
+        </div>
+      )}
+
       {/* Floating create button */}
       <motion.button
-        onClick={() => setCreateOpen(true)}
-        className="fixed bottom-8 right-8 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg transition-colors hover:bg-accent/90"
-        whileHover={{ scale: 1.1 }}
+        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        aria-label="Create a Spark"
+        onClick={() => setCreateOpen(true)}
+        className="fixed bottom-6 right-6 z-30 flex items-center gap-2 bg-accent text-accent-foreground px-4 py-3 rounded-full shadow-lg font-sans text-sm font-semibold hover:bg-accent/90 transition-colors"
       >
-        <Plus className="h-6 w-6" />
+        <Plus className="h-4 w-4" />
+        New Spark
       </motion.button>
 
-      <CreateSparkModal isOpen={createOpen} onClose={() => setCreateOpen(false)} />
+      <CreateSparkModal open={createOpen} onOpenChange={setCreateOpen} />
     </section>
   );
 };
